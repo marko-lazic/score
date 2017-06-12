@@ -19,7 +19,7 @@ public class ClientConf {
     private static ClientConf   clientConf;
     private static boolean      instanceFlag;
     //boost::mutext             confMutex;
-    private String fileSaveLocation;
+    private String              fileSaveLocation;
     private String              username;
     private String              password;
     private String              simaHostname;
@@ -74,13 +74,13 @@ public class ClientConf {
         confFilePath            = execDirLocation + CONF_FILE_NAME;
         logDirPath              = execDirLocation + "logs";
 
-        final char alphanum[] =
-                ("0123456789" +
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                        "abcdefghijklmnopqrstuvwxyz")
-                        .toCharArray();
+        final char alphanum[]   =
+                                ("0123456789" +
+                                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                                 "abcdefghijklmnopqrstuvwxyz")
+                                .toCharArray();
 
-        Random random = new Random();
+        Random random           = new Random();
 
         for (int i = 0; i < 10; ++i) {
             logFilePrefix += alphanum[random.nextInt(alphanum.length)];
@@ -109,9 +109,7 @@ public class ClientConf {
     }
 
     private void populate() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.setFieldNamingStrategy(SIMANamingStrategy());
-        Gson gson = builder.create();
+        Gson gson = new GsonBuilder().setFieldNamingStrategy(SIMANamingStrategy()).create();
         ClientConfFile clientConfFile;
         try (JsonReader reader = new JsonReader(new FileReader(CONF_FILE_NAME))) {
 
@@ -148,10 +146,10 @@ public class ClientConf {
         clientConfFile.detailLog                    = detailLog;
         clientConfFile.sizePerLogFile               = sizePerLogFileMB;
 
-        GsonBuilder builder = new GsonBuilder();
-        builder.setFieldNamingStrategy(SIMANamingStrategy());
-        builder.setPrettyPrinting().serializeNulls();
-        Gson gson = builder.create();
+        Gson gson  = new GsonBuilder()
+                        .setFieldNamingStrategy(SIMANamingStrategy())
+                        .setPrettyPrinting().serializeNulls()
+                        .create();
         try ( PrintWriter out = new PrintWriter(CONF_FILE_NAME) ) {}
         catch (Exception e) { System.out.println(e.getMessage()); }
     }
