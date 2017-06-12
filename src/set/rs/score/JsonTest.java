@@ -37,6 +37,25 @@ class JsonTest {
         assertEquals(1,1);
     }
 
+    private FieldNamingStrategy SIMANamingStrategy() {
+        return new FieldNamingStrategy() {
+            @Override
+            public String translateName(Field field) {
+                switch (field.getName()) {
+                    case "fileSaveLocation":                return "file save location";
+                    case "simaHostname":                    return "sima hostname";
+                    case "customMessagesThreadSleepSec":    return "custom messages thread sleep sec";
+                    case "customMessagesAliveTimeSec":      return "custom messages alive time sec";
+                    case "autoLogin":                       return "auto login";
+                    case "maxUploadSpeedUnlimited":         return "max upload speed unlimited";
+                    case "detailLog":                       return "detail log";
+                    case "sizePerLogFile":                  return "size per log file MB";
+                    default:                                return field.getName();
+                }
+            }
+        };
+    }
+
     @Test
     void toGson(){
         ClientConfFile clientConfFile = new ClientConfFile();
@@ -53,7 +72,7 @@ class JsonTest {
         clientConfFile.detailLog = false;
         clientConfFile.sizePerLogFile = 1;
         GsonBuilder builder = new GsonBuilder();
-        builder.setFieldNamingStrategy(new FieldNamingStrategy() {
+        /*builder.setFieldNamingStrategy(new FieldNamingStrategy() {
             @Override
             public String translateName(Field field) {
                 switch (field.getName()) {
@@ -77,7 +96,8 @@ class JsonTest {
                         return field.getName();
                 }
             }
-        });
+        });*/
+        builder.setFieldNamingStrategy(SIMANamingStrategy());
         builder.setPrettyPrinting().serializeNulls();
         Gson gson = builder.create();
         //System.out.println(gson.toJson(clientConfFile));

@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.Random;
 
@@ -56,9 +57,9 @@ public class ClientConf {
 
 
     public ClientConf instance() {
-        if (!instanceFlag) { // TODO: obesiću se
-            clientConf = new ClientConf();
-            instanceFlag = true;
+        if (!instanceFlag) {
+            clientConf      = new ClientConf();
+            instanceFlag    = true;
         }
         return clientConf;
     }
@@ -88,37 +89,31 @@ public class ClientConf {
         populate();
     }
 
-    private void populate() {
-        //boost::mutex::scoped_lock lock(_conf_mutex);
-        GsonBuilder builder = new GsonBuilder();
-        builder.setFieldNamingStrategy(new FieldNamingStrategy() {
+    private FieldNamingStrategy SIMANamingStrategy() {
+        return new FieldNamingStrategy() {
             @Override
             public String translateName(Field field) {
                 switch (field.getName()) {
-                    case "fileSaveLocation":
-                        return "file save location";
-                    case "simaHostname":
-                        return "sima hostname";
-                    case "customMessagesThreadSleepSec":
-                        return "custom messages thread sleep sec";
-                    case "customMessagesAliveTimeSec":
-                        return "custom messages alive time sec";
-                    case "autoLogin":
-                        return "auto login";
-                    case "maxUploadSpeedUnlimited":
-                        return "max upload speed unlimited";
-                    case "detailLog":
-                        return "detail log";
-                    case "sizePerLogFile":
-                        return "size per log file MB";
-                    default:
-                        return field.getName();
+                    case "fileSaveLocation":                return "file save location";
+                    case "simaHostname":                    return "sima hostname";
+                    case "customMessagesThreadSleepSec":    return "custom messages thread sleep sec";
+                    case "customMessagesAliveTimeSec":      return "custom messages alive time sec";
+                    case "autoLogin":                       return "auto login";
+                    case "maxUploadSpeedUnlimited":         return "max upload speed unlimited";
+                    case "detailLog":                       return "detail log";
+                    case "sizePerLogFile":                  return "size per log file MB";
+                    default:                                return field.getName();
                 }
             }
-        });
+        };
+    }
+
+    private void populate() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.setFieldNamingStrategy(SIMANamingStrategy());
         Gson gson = builder.create();
         ClientConfFile clientConfFile;
-        try (JsonReader reader = new JsonReader(new FileReader("SIMAClient.conf"))) {
+        try (JsonReader reader = new JsonReader(new FileReader(CONF_FILE_NAME))) {
 
             clientConfFile = gson.fromJson(reader, ClientConfFile.class);
             fileSaveLocation                = clientConfFile.fileSaveLocation;
@@ -136,11 +131,29 @@ public class ClientConf {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        //lock.unlock();
     }
 
-    public void json(){
+    public void writeToFile(){
+        ClientConfFile clientConfFile               = new ClientConfFile();
+        clientConfFile.fileSaveLocation             = fileSaveLocation;
+        clientConfFile.username                     = username;
+        clientConfFile.password                     = password;
+        clientConfFile.simaHostname                 = simaHostname;
+        clientConfFile.pseudonim                    = pseudonim;
+        clientConfFile.language                     = language;
+        clientConfFile.customMessagesThreadSleepSec = customMessagesThreadSleepSec;
+        clientConfFile.customMessagesAliveTimeSec   = customMessagesAliveTimeSec;
+        clientConfFile.autoLogin                    = autoLogin;
+        clientConfFile.maxUploadSpeedUnlimited      = maxUploadSPeedUnlimited;
+        clientConfFile.detailLog                    = detailLog;
+        clientConfFile.sizePerLogFile               = sizePerLogFileMB;
 
+        GsonBuilder builder = new GsonBuilder();
+        builder.setFieldNamingStrategy(SIMANamingStrategy());
+        builder.setPrettyPrinting().serializeNulls();
+        Gson gson = builder.create();
+        try ( PrintWriter out = new PrintWriter(CONF_FILE_NAME) ) {}
+        catch (Exception e) { System.out.println(e.getMessage()); }
     }
 }
 
